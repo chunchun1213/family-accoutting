@@ -1,19 +1,21 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: Initial → 1.0.0
-  Modified principles: N/A (initial version)
+  Version change: 1.0.0 → 1.1.0
+  Modified principles: N/A
   Added sections:
-    - Core Principles (4 principles: Code Quality First, Test-Driven Development, User Experience Consistency, Performance by Design)
-    - Performance Standards
-    - Quality Gates
-    - Governance
+    - New Principle V: Documentation Language Standard (Traditional Chinese requirement)
   Removed sections: N/A
   Templates requiring updates:
-    ✅ plan-template.md - validated, aligns with constitution checks
-    ✅ spec-template.md - validated, aligns with acceptance scenarios and requirements
-    ✅ tasks-template.md - validated, aligns with test-first approach
-  Follow-up TODOs: None
+    ✅ plan-template.md - updated with zh-TW language requirement notice
+    ✅ spec-template.md - updated with zh-TW language requirement notice
+    ✅ tasks-template.md - updated with zh-TW language requirement notice
+    ✅ checklist-template.md - updated with zh-TW guidance for user-facing checklists
+    ✅ agent-file-template.md - updated with zh-TW guidance
+  Follow-up TODOs:
+    - Verify all existing spec.md files comply with zh-TW requirement (if any exist)
+    - Update any existing English documentation to Traditional Chinese (if any exist)
+    - Ensure AGENTS.md term mappings are comprehensive for technical terminology
 -->
 
 # Family Accounting Constitution
@@ -120,6 +122,44 @@ financial data.
 **Rationale**: Users interact with their financial data frequently. Slow responses frustrate 
 users and reduce trust. Performance issues compound with family data growth over years.
 
+### V. Documentation Language Standard (NON-NEGOTIABLE)
+
+**All specifications, plans, and user-facing documentation MUST be written in Traditional 
+Chinese (zh-TW)**:
+
+- **Specification Documents**: All `spec.md` files MUST be written entirely in Traditional 
+  Chinese. This includes user stories, acceptance scenarios, requirements, and success criteria.
+  
+- **Implementation Plans**: All `plan.md` files MUST use Traditional Chinese for all sections 
+  including summary, technical context, constitution check, and complexity tracking.
+  
+- **Task Documentation**: All `tasks.md` files MUST use Traditional Chinese for task 
+  descriptions, phase explanations, and checkpoint descriptions.
+  
+- **User-Facing Documentation**: README files, quickstart guides, API documentation intended 
+  for end users, and error messages visible to users MUST be in Traditional Chinese.
+  
+- **Code Comments**: Comments in code that explain business logic or user-facing behavior 
+  SHOULD be in Traditional Chinese where appropriate. Technical implementation comments MAY 
+  be in English.
+  
+- **Exceptions**: The following MAY remain in English:
+  - Code identifiers (variable names, function names, class names)
+  - Commit messages (optional, but Chinese preferred)
+  - Technical debugging logs
+  - Third-party library documentation references
+  - Constitution document itself (this file) for international collaboration
+  
+- **Translation Quality**: Machine translation is acceptable for initial drafts but MUST be 
+  reviewed by native Traditional Chinese speakers. Technical terminology MUST use standard 
+  industry translations (see term mappings in AGENTS.md).
+
+**Rationale**: The family accounting application serves Traditional Chinese-speaking users. 
+Native language documentation reduces cognitive load, prevents misunderstandings in financial 
+contexts, and ensures accessibility for all family members regardless of English proficiency. 
+Clear communication in the user's native language is essential for financial applications where 
+errors can have real monetary consequences.
+
 ## Performance Standards
 
 ### Monitoring & Observability
@@ -157,6 +197,7 @@ users and reduce trust. Performance issues compound with family data growth over
 - [ ] Tests written before implementation (TDD cycle followed)
 - [ ] UX changes reviewed against consistency principles
 - [ ] Performance requirements verified (no regressions)
+- [ ] Documentation language verified (spec.md, plan.md, tasks.md in Traditional Chinese)
 
 ### Gate 2: Automated Testing
 
@@ -218,4 +259,4 @@ This constitution is a living document. Amendments require:
 - Implementation plans: `/specs/[feature]/plan.md`
 - Task tracking: `/specs/[feature]/tasks.md`
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-12
+**Version**: 1.1.0 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-12

@@ -5,6 +5,13 @@
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
+<!--
+  ⚠️ LANGUAGE REQUIREMENT (Constitution V):
+  This document MUST be written in Traditional Chinese (zh-TW).
+  All sections including summary, technical context, and complexity tracking MUST use Traditional Chinese.
+  Technical terms may reference English originals in parentheses for clarity.
+-->
+
 ## Summary
 
 [Extract from feature spec: primary requirement + technical approach from research]

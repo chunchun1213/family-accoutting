@@ -12,6 +12,13 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+<!--
+  ⚠️ LANGUAGE REQUIREMENT (Constitution V):
+  This document MUST be written in Traditional Chinese (zh-TW).
+  All task descriptions, phase explanations, and checkpoint descriptions MUST use Traditional Chinese.
+  File paths and technical commands may remain in English.
+-->
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)

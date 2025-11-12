@@ -2,6 +2,12 @@
 
 Auto-generated from all feature plans. Last updated: [DATE]
 
+<!--
+  ⚠️ LANGUAGE REQUIREMENT (Constitution V):
+  This development guideline document SHOULD use Traditional Chinese (zh-TW) for general guidance.
+  Technical commands and code examples may remain in English.
+-->
+
 ## Active Technologies
 
 [EXTRACTED FROM ALL PLAN.MD FILES]
