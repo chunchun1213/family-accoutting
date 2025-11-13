@@ -440,8 +440,8 @@ TextButton(
 ```
 
 #### 設計資源
-- **圖示**: `design-assets/login-user-icon.svg`
-- **切換密碼圖示**: `design-assets/password-toggle-icon.svg`
+- **圖示**: `design-assets/icons/login-user-icon.svg`
+- **切換密碼圖示**: `design-assets/icons/password-toggle-icon.svg`
 
 ---
 
@@ -559,9 +559,9 @@ Container(
 ```
 
 #### 設計資源
-- **日曆圖示**: `design-assets/home-calendar-icon.svg`
-- **選單圖示**: `design-assets/menu-icon.svg`
-- **通知圖示**: `design-assets/notification-bell-icon.svg`
+- **日曆圖示**: `design-assets/icons/home-calendar-icon.svg`
+- **選單圖示**: `design-assets/icons/menu-icon.svg`
+- **通知圖示**: `design-assets/icons/notification-bell-icon.svg`
 
 ---
 
@@ -803,9 +803,9 @@ Container(
 ```
 
 #### 設計資源
-- **郵件圖示**: `design-assets/email-verification-icon.svg`
-- **返回箭頭**: `design-assets/back-arrow-icon.svg`
-- **資訊圖示**: `design-assets/info-icon.svg`
+- **郵件圖示**: `design-assets/icons/email-verification-icon.svg`
+- **返回箭頭**: `design-assets/icons/back-arrow-icon.svg`
+- **資訊圖示**: `design-assets/icons/info-icon.svg`
 
 ---
 
@@ -1163,18 +1163,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 ### 圖示資源清單
 
-所有圖示均已匯出至 `design-assets/` 目錄：
+所有圖示均已匯出至 `design-assets/icons/` 目錄：
 
 | 圖示名稱 | 檔案路徑 | 用途 | 尺寸 |
 |---------|---------|------|------|
-| 登入使用者圖示 | `design-assets/login-user-icon.svg` | 登入頁歡迎卡片 | 48×48 |
-| 首頁日曆圖示 | `design-assets/home-calendar-icon.svg` | 首頁功能開發中圖示 | 96×96 |
-| Email 驗證圖示 | `design-assets/email-verification-icon.svg` | Email 驗證頁說明圖示 | 64×64 |
-| 密碼切換圖示 | `design-assets/password-toggle-icon.svg` | 密碼輸入框顯示/隱藏 | 20×20 |
-| 通知鈴鐺圖示 | `design-assets/notification-bell-icon.svg` | 頁面標題欄通知按鈕 | 20×20 |
-| 選單圖示 | `design-assets/menu-icon.svg` | 頁面標題欄漢堡選單 | 24×24 |
-| 返回箭頭圖示 | `design-assets/back-arrow-icon.svg` | 返回上一頁按鈕 | 24×24 |
-| 資訊圖示 | `design-assets/info-icon.svg` | 驗證碼過期提示 | 20×20 |
+| 登入使用者圖示 | `design-assets/icons/login-user-icon.svg` | 登入頁歡迎卡片 | 48×48 |
+| 首頁日曆圖示 | `design-assets/icons/home-calendar-icon.svg` | 首頁功能開發中圖示 | 96×96 |
+| Email 驗證圖示 | `design-assets/icons/email-verification-icon.svg` | Email 驗證頁說明圖示 | 64×64 |
+| 密碼切換圖示 | `design-assets/icons/password-toggle-icon.svg` | 密碼輸入框顯示/隱藏 | 20×20 |
+| 通知鈴鐺圖示 | `design-assets/icons/notification-bell-icon.svg` | 頁面標題欄通知按鈕 | 20×20 |
+| 選單圖示 | `design-assets/icons/menu-icon.svg` | 頁面標題欄漢堡選單 | 24×24 |
+| 返回箭頭圖示 | `design-assets/icons/back-arrow-icon.svg` | 返回上一頁按鈕 | 24×24 |
+| 資訊圖示 | `design-assets/icons/info-icon.svg` | 驗證碼過期提示 | 20×20 |
 
 ### Flutter 資源配置
 
