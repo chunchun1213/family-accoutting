@@ -5,13 +5,6 @@
 **Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
-<!--
-  ⚠️ LANGUAGE REQUIREMENT (Constitution V):
-  This document MUST be written in Traditional Chinese (zh-TW).
-  All sections including user stories, requirements, and success criteria MUST use Traditional Chinese.
-  Only code examples and technical identifiers may use English.
--->
-
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
