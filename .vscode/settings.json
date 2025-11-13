@@ -16,7 +16,7 @@
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
-                "/Users/chunchun/文件/speckit/family-accoutting"
+                "/Users/chunchun/\u6587\u4ef6/speckit/family-accoutting"
             ]
         },
         "Framelink Figma MCP": {
@@ -30,4 +30,3 @@
         }
     }
 }
-
