@@ -2,44 +2,44 @@
 
 ## Content Quality Checks
 
-- [ ] **User Stories 具備清晰的使用者價值**: 每個 User Story 都明確說明了使用者的目標和需求
-- [ ] **Acceptance Scenarios 使用 Given-When-Then 格式**: 所有驗收場景都遵循標準格式且具體可測試
-- [ ] **Priority 分配合理**: P1 包含註冊、登入等核心功能；P2 包含重新發送驗證碼等輔助功能；P3 包含登出和主頁展示
-- [ ] **Edge Cases 涵蓋完整**: 已識別 10 個邊界情況，包含安全性、網路、使用者體驗等面向
-- [ ] **Functional Requirements 編號清晰**: FR-001 到 FR-042 按照功能模組組織，編號連續且易於追蹤
-- [ ] **Key Entities 定義明確**: 定義了 User、VerificationCode、Session、RegistrationRequest 四個核心實體及其屬性和關聯
-- [ ] **Success Criteria 可測量**: 所有成功標準都包含具體數字指標（時間、百分比、評分等）
+- [X] **User Stories 具備清晰的使用者價值**: ✅ 5 個 User Stories 皆有明確的使用者目標 (US1-5: 註冊驗證/重發驗證碼/登入/登出/主頁)
+- [X] **Acceptance Scenarios 使用 Given-When-Then 格式**: ✅ 所有 User Stories 包含 3 個完整的 Given-When-Then 場景 (正常/錯誤/邊界)
+- [X] **Priority 分配合理**: ✅ P1 (註冊 US1, 登入 US3) / P2 (重發驗證碼 US2, 登出 US4) / P3 (主頁 US5)
+- [X] **Edge Cases 涵蓋完整**: ✅ 10 個邊界情況 (驗證碼 5 次鎖定/Email 格式/會話過期/密碼顯示/網路失敗/重複註冊/特殊字元/多裝置登入等)
+- [X] **Functional Requirements 編號清晰**: ✅ FR-001 至 FR-054 (54 個) + NFR-001 至 NFR-009 (9 個), 編號連續無重複
+- [X] **Key Entities 定義明確**: ✅ 5 個實體 (User, UserProfile, RegistrationRequest, VerificationCode, Session) 包含屬性/型別/約束/關聯
+- [X] **Success Criteria 可測量**: ✅ SC-001 至 SC-016 (16 個) 包含具體數值與測量方法 (時間/並發數/P95 延遲/滿意度評分)
 
 ## Requirement Completeness Checks
 
-- [ ] **註冊流程完整性**: 包含表單驗證（FR-001 到 FR-005）、驗證碼生成與發送（FR-006 到 FR-009）
-- [ ] **Email 驗證流程完整性**: 包含驗證碼驗證（FR-010 到 FR-014）、重新發送機制（FR-015 到 FR-019）
-- [ ] **登入流程完整性**: 包含基本登入（FR-020 到 FR-025）、自動登入（FR-026 到 FR-027）、安全性（FR-028）
-- [ ] **登出流程完整性**: 包含登出按鈕（FR-029）、確認機制（FR-030）、會話清除（FR-031 到 FR-032）
-- [ ] **主頁功能完整性**: 包含頁面結構（FR-033 到 FR-036）、施工中內容（FR-037）、選單功能（FR-038）
-- [ ] **一般性需求涵蓋**: 包含表單驗證（FR-039）、防重複提交（FR-040）、錯誤處理（FR-041）、資料標準化（FR-042）
-- [ ] **安全性考量**: 密碼規則（FR-002）、密碼隱藏（FR-028）、錯誤訊息不洩漏資訊（FR-022）、Email 去重（FR-042）
-- [ ] **使用者體驗考量**: 即時驗證（FR-039）、載入指示器（FR-040）、友善錯誤訊息（FR-041）、倒數計時（FR-018）
+- [X] **註冊流程完整性**: ✅ 表單 (FR-001, FR-054) / 驗證規則 (FR-002~005) / 驗證碼生成 (FR-006, FR-053 bcrypt) / Email 發送 (FR-007, FR-045 Resend) / 有效期 (FR-008) / 導航 (FR-009)
+- [X] **Email 驗證流程完整性**: ✅ 驗證介面 (FR-010) / 驗證邏輯 (FR-011~013) / 成功流程 (FR-014) / 重發功能 (FR-015~017 60秒冷卻) / 倒數計時 (FR-018) / 過期處理 (FR-019) / 錯誤追蹤 (FR-020~021 5次鎖定)
+- [X] **登入流程完整性**: ✅ 表單 (FR-022) / 驗證 (FR-023) / 錯誤處理 (FR-024) / 會話管理 (FR-025~026) / 自動登入 (FR-028~029) / Token刷新 (FR-049~050) / 會話驗證 (FR-051~052) / 導航 (FR-027) / 密碼顯示 (FR-030)
+- [X] **登出流程完整性**: ✅ 登出按鈕 (FR-031) / 確認對話框 (FR-032) / 清理會話 (FR-033) / 導航 (FR-034)
+- [X] **主頁功能完整性**: ✅ 顯示條件 (FR-035) / 標題 (FR-036) / 按鈕 (FR-037~038) / 內容區域 (FR-039) / 登出整合 (FR-040)
+- [X] **一般性需求涵蓋**: ✅ 即時驗證 (FR-041) / 載入狀態 (FR-042) / 網路錯誤 (FR-043) / Email 正規化 (FR-044) / Email 服務 (FR-045) / 技術架構 (FR-046~048)
+- [X] **安全性考量**: ✅ CORS (NFR-001) / Rate Limiting (NFR-002) / 驗證碼保護 (NFR-003, FR-053 bcrypt) / 密碼雜湊 (FR-048) / SQL injection 防護 (FR-054) / XSS 防護 (FR-054) / 統一錯誤訊息 (FR-024)
+- [X] **使用者體驗考量**: ✅ 即時驗證 (FR-041 <500ms) / 載入回饋 (FR-042) / 友善錯誤 (FR-043, NFR-005) / 密碼可見性 (FR-030) / 倒數計時 (FR-018) / 冷卻提示 (FR-016) / 自動導航 / 自動登入 (FR-028~029)
 
 ## Feature Readiness Checks
 
-- [ ] **技術可行性**: 所有需求在目前的技術架構下可實現（Flutter 前端、Email 服務、會話管理）
-- [ ] **相依性識別**: 已識別 Email 發送服務、會話儲存機制為關鍵相依項
-- [ ] **測試能力**: 所有 Acceptance Scenarios 都可以透過自動化或手動測試驗證
-- [ ] **效能指標**: Success Criteria 包含明確的效能要求（回應時間、並發處理能力）
-- [ ] **使用者體驗指標**: Success Criteria 包含使用者滿意度測量方式（問卷、評分）
-- [ ] **資料模型完整**: Key Entities 定義了所有必要的資料結構和關聯
-- [ ] **錯誤處理策略**: Edge Cases 和 Functional Requirements 涵蓋了主要錯誤情境
-- [ ] **無 NEEDS CLARIFICATION 標記**: 規格書中沒有需要進一步澄清的項目（或不超過 3 個）
+- [X] **技術可行性**: ✅ Flutter 3.35.7 已驗證 / Supabase local 運行中 / Edge Functions (Hono 3.11.7) 測試通過 / bcrypt 可用 / Resend API 已配置 / flutter_secure_storage 9.2.4 已安裝
+- [X] **相依性識別**: ✅ 前端 (flutter_riverpod 2.6.1, go_router 13.2.5, supabase_flutter 2.8.3) / 後端 (Hono 3.11.7, Resend, bcrypt) / 資料庫 (PostgreSQL 15+, Supabase Auth) / Phase 相依 (Phase 1&2 完成)
+- [X] **測試能力**: ✅ 單元測試 (≥80% NFR-008) / 整合測試 (NFR-009) / 負載測試 (k6 驗證 100 並發 NFR-007) / E2E 測試 (Flutter integration_test) / API 測試 (curl 已驗證)
+- [X] **效能指標**: ✅ 驗證碼發送 P95 <30s (NFR-006, SC-004) / 並發處理 100 請求<3s (NFR-007, SC-011) / 即時驗證 <500ms (FR-041, SC-006) / 登入 <10s (SC-002) / 自動登入 <2s (SC-005)
+- [X] **使用者體驗指標**: ✅ 註冊完成率 90% (SC-003) / 註冊時間 <3 分鐘 (SC-001) / 介面滿意度 ≥4.0 (SC-014) / 流程易理解度 85% (SC-013) / 錯誤訊息清晰度 ≥4.0 (SC-016) / 自動登入理解度 90% (SC-015)
+- [X] **資料模型完整**: ✅ 5 個實體已定義 (User, UserProfile, RegistrationRequest, VerificationCode, Session) / 關聯關係 (1:1, 1:N) / 索引策略 / RLS 政策 / 清理策略 (pg_cron)
+- [X] **錯誤處理策略**: ✅ 統一錯誤格式 (NFR-004) / 網路錯誤 (NFR-005) / 驗證錯誤 (FR-041) / 驗證碼錯誤追蹤 (FR-021) / 會話過期 (FR-052) / Email 重複 (FR-005) / 登入失敗 (FR-024)
+- [X] **無 NEEDS CLARIFICATION 標記**: ✅ 已搜尋所有規格文件 (spec.md, data-model.md, research.md) 未發現任何 "NEEDS CLARIFICATION" 或 "TODO" 標記 / 所有技術決策已記錄於 research.md Part A~F
 
 ## Implementation Details Checks
 
-- [ ] **UI/UX 規格明確**: 已有獨立的 Flutter 前端設計規格書（doc/Flutter前端設計規格書.md）定義介面細節
-- [ ] **API 需求識別**: 需要實作的 API 端點包含：註冊 API、發送驗證碼 API、驗證碼驗證 API、登入 API、登出 API、會話驗證 API
-- [ ] **資料驗證規則具體**: 密碼規則（8-20 碼，大小寫+數字）、Email 格式驗證、姓名長度限制（50 字元）
-- [ ] **時間參數明確**: 驗證碼有效期 5 分鐘、重新發送冷卻 60 秒、會話過期時間（需在實作時決定）
-- [ ] **錯誤訊息標準化**: 已定義統一的錯誤訊息格式和內容
-- [ ] **狀態管理需求**: 已識別需要管理的狀態（帳號狀態、驗證碼狀態、會話狀態、註冊請求狀態）
+- [X] **UI/UX 規格明確**: ✅ 註冊頁面 (4 欄位, 即時驗證, 載入狀態) / 驗證碼頁面 (顯示 Email, 6 位數輸入, 倒數計時, 重發按鈕 60s冷卻) / 登入頁面 (2 欄位, 密碼顯示/隱藏, 載入) / 主頁 (標題, 選單, 通知, 日曆圖示+「功能開發中」)
+- [X] **API 需求識別**: ✅ POST /auth/register, POST /auth/verify-code, POST /auth/login, POST /auth/logout, GET /auth/me, POST /auth/resend-code, POST /auth/refresh-token / 所有端點已實作骨架 / contracts/auth-api.yaml 定義完整
+- [X] **資料驗證規則具體**: ✅ Email (標準格式 含@, 統一小寫) / Password (8-20碼, 1大寫+1小寫+1數字) / Name (1-50字元, 過濾危險字元) / Code (6位數字) / 前端: validators.dart / 後端: validators.ts (Zod)
+- [X] **時間參數明確**: ✅ 驗證碼有效期 5分鐘 (FR-008, FR-012) / 重發冷卻 60秒 (FR-016) / 註冊請求過期 30分鐘 / Access token 1小時 (FR-049) / Refresh token 30天 (FR-049) / Token 自動刷新 過期前5分鐘 (FR-050) / 舊驗證碼清理 7天後
+- [X] **錯誤訊息標準化**: ✅ 前端: "Email 格式不正確", "密碼必須為 8-20 碼" 等中文訊息 (validators.dart) / 後端: { error_code, message, details } (NFR-004) / 網路錯誤: "網路連線失敗..." (FR-043) / 驗證碼: "驗證碼輸入錯誤次數過多..." (FR-021) / 登入: "Email 或密碼錯誤" (FR-024)
+- [X] **狀態管理需求**: ✅ 全域認證狀態 (Riverpod AsyncNotifierProvider) / 4 種狀態 (Initial, Loading, Authenticated(user, token), Unauthenticated) / 自動會話檢查 (APP 啟動) / Token 自動刷新 (過期前 5 分鐘) / 登出清理 / 錯誤狀態處理 / 實作指引: research.md Part A
 
 ## Validation Summary
 
