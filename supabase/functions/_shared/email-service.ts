@@ -8,17 +8,24 @@ export class EmailService {
   private static readonly apiKey = Deno.env.get('RESEND_API_KEY');
   private static readonly apiUrl = 'https://api.resend.com/emails';
   private static readonly fromEmail = Deno.env.get('VERIFICATION_EMAIL_FROM') || 'noreply@example.com';
+  private static readonly isLocal = Deno.env.get('SUPABASE_URL')?.includes('127.0.0.1') || Deno.env.get('SUPABASE_URL')?.includes('localhost');
 
   /**
-   * Send verification code email using Resend API
+   * Send verification code email using Resend API or Mailpit (local)
    */
   static async sendVerificationCode(email: string, code: string, expiresInMinutes: number): Promise<boolean> {
-    if (!this.apiKey) {
-      console.error('RESEND_API_KEY environment variable not set');
-      return false;
-    }
-
     const html = this.generateVerificationEmailTemplate(code, expiresInMinutes);
+
+    // For local development, use Mailpit SMTP (just return true and log code)
+    if (this.isLocal || !this.apiKey) {
+      console.log('========== LOCAL EMAIL (Mailpit) ==========');
+      console.log('TO:', email);
+      console.log('SUBJECT: 家庭記帳系統 - Email 驗證碼');
+      console.log('VERIFICATION CODE:', code);
+      console.log('EXPIRES IN:', expiresInMinutes, 'minutes');
+      console.log('==========================================');
+      return true; // Simulate success for local testing
+    }
 
     return this.sendEmail({
       to: email,

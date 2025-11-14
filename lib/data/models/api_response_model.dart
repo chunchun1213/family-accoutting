@@ -3,20 +3,31 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'api_response_model.freezed.dart';
 part 'api_response_model.g.dart';
 
-@freezed
-class ApiResponse<T> with _$ApiResponse<T> {
-  const factory ApiResponse({
-    required bool success,
-    T? data,
-    ApiError? error,
-    String? timestamp,
-  }) = _ApiResponse<T>;
+// Generic ApiResponse (not using freezed due to generic type limitations)
+class ApiResponse<T> {
+  final bool success;
+  final T? data;
+  final ApiError? error;
+  final String? timestamp;
+
+  const ApiResponse({
+    required this.success,
+    this.data,
+    this.error,
+    this.timestamp,
+  });
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
-  ) =>
-      _$ApiResponseFromJson(json, fromJsonT);
+  ) {
+    return ApiResponse<T>(
+      success: json['success'] as bool,
+      data: json['data'] != null ? fromJsonT(json['data']) : null,
+      error: json['error'] != null ? ApiError.fromJson(json['error'] as Map<String, dynamic>) : null,
+      timestamp: json['timestamp'] as String?,
+    );
+  }
 }
 
 @freezed

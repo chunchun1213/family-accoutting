@@ -1,5 +1,13 @@
-import { compare, hash } from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 import { APP_CONSTANTS } from './types.ts';
+
+// Use Web Crypto API for hashing (compatible with Deno Deploy/Edge Functions)
+async function hashWithCrypto(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 export class DbHelpers {
   /**
@@ -11,31 +19,33 @@ export class DbHelpers {
   }
 
   /**
-   * Hash a string using bcrypt
+   * Hash a string using SHA-256 (Web Crypto API)
    */
   static async hashPassword(password: string): Promise<string> {
-    return await hash(password);
+    return await hashWithCrypto(password);
   }
 
   /**
-   * Compare a plain text password with a bcrypt hash
+   * Compare a plain text password with a SHA-256 hash
    */
   static async comparePassword(password: string, hash: string): Promise<boolean> {
-    return await compare(password, hash);
+    const hashedPassword = await hashWithCrypto(password);
+    return hashedPassword === hash;
   }
 
   /**
-   * Hash a verification code using bcrypt
+   * Hash a verification code using SHA-256
    */
   static async hashCode(code: string): Promise<string> {
-    return await hash(code);
+    return await hashWithCrypto(code);
   }
 
   /**
-   * Compare a verification code with a bcrypt hash
+   * Compare a verification code with a SHA-256 hash
    */
   static async compareCode(code: string, hash: string): Promise<boolean> {
-    return await compare(code, hash);
+    const hashedCode = await hashWithCrypto(code);
+    return hashedCode === hash;
   }
 
   /**

@@ -43,7 +43,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 });
 
 /// Legacy function for backward compatibility
-final GoRouter getAppRouter(WidgetRef ref) {
+GoRouter getAppRouter(WidgetRef ref) {
   return ref.watch(appRouterProvider);
 }
 
