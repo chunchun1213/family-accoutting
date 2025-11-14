@@ -1,0 +1,899 @@
+openapi: 3.0.3
+info:
+  title: Family Accounting - Authentication API
+  description: |
+    會員註冊與登入系統 API 規格
+    
+    **功能範圍**:
+    - 會員註冊與 Email 驗證
+    - 登入/登出
+    - 驗證碼重新發送
+    - 會話管理
+    
+    **技術棧**:
+    - Runtime: Deno 1.40+
+    - Framework: Hono 3.11+
+    - Auth: Supabase Auth (bcrypt)
+    - Email: Resend API
+    
+    **安全性**:
+    - 所有端點使用 HTTPS
+    - 密碼使用 bcrypt hash (cost 10)
+    - 驗證碼使用 bcrypt hash 儲存
+    - Rate limiting: 每 IP 每分鐘 60 次請求
+    - CORS: 僅允許前端網域
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+
+servers:
+  - url: https://{project_id}.supabase.co/functions/v1
+    description: Supabase Edge Functions (Production)
+    variables:
+      project_id:
+        default: your-project-id
+        description: Supabase 專案 ID
+  - url: http://localhost:54321/functions/v1
+    description: Local Development
+
+tags:
+  - name: Registration
+    description: 註冊與驗證相關操作
+  - name: Authentication
+    description: 登入/登出操作
+  - name: Session
+    description: 會話管理
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Registration
+      summary: 會員註冊
+      description: |
+        建立新的註冊請求並發送 6 位數驗證碼到使用者 Email。
+        
+        **業務邏輯**:
+        1. 驗證 Email 格式與密碼強度
+        2. 檢查 Email 是否已註冊（auth.users 與 registration_requests）
+        3. 建立 registration_request 記錄（密碼 bcrypt hash）
+        4. 產生 6 位數驗證碼（隨機數字）
+        5. 儲存驗證碼 bcrypt hash 到 verification_codes 表
+        6. 透過 Resend API 發送驗證碼 Email
+        7. 回傳成功訊息（不洩漏驗證碼）
+        
+        **驗證碼規則**:
+        - 有效期: 5 分鐘
+        - 最大嘗試次數: 5 次
+        - 重新發送冷卻: 60 秒
+        
+        **錯誤處理**:
+        - Email 已存在 → 400 EMAIL_EXISTS
+        - Email 格式錯誤 → 400 INVALID_EMAIL
+        - 密碼不符規則 → 400 INVALID_PASSWORD
+        - Resend API 失敗 → 503 EMAIL_SEND_FAILED
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              valid:
+                summary: 有效的註冊請求
+                value:
+                  email: user@example.com
+                  name: 王小明
+                  password: Password123
+              invalid_email:
+                summary: 無效的 Email 格式
+                value:
+                  email: invalid-email
+                  name: 王小明
+                  password: Password123
+      responses:
+        '201':
+          description: 註冊請求建立成功，驗證碼已發送
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              example:
+                success: true
+                message: 驗證碼已發送至您的 Email，請於 5 分鐘內完成驗證
+                data:
+                  email: user@example.com
+                  expires_at: "2025-11-14T10:35:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /auth/verify-code:
+    post:
+      tags:
+        - Registration
+      summary: 驗證 Email 驗證碼
+      description: |
+        驗證使用者輸入的 6 位數驗證碼，成功後建立 Supabase Auth 使用者並回傳 JWT token。
+        
+        **業務邏輯**:
+        1. 使用 SELECT FOR UPDATE 鎖定驗證碼記錄（防止並發）
+        2. 檢查驗證碼狀態（pending/locked/expired）
+        3. 驗證驗證碼是否正確（bcrypt.compare）
+        4. 錯誤則增加 attempt_count，達 5 次則鎖定
+        5. 正確則透過 Supabase Admin API 建立使用者
+        6. 建立 user_profile 記錄
+        7. 刪除 registration_request 與 verification_code
+        8. 產生 JWT token 並回傳
+        
+        **狀態轉換**:
+        - 驗證成功: pending → verified
+        - 5 次失敗: pending → locked
+        - 過期: pending → expired
+        
+        **錯誤處理**:
+        - 驗證碼錯誤 → 400 INVALID_CODE（包含剩餘嘗試次數）
+        - 驗證碼已過期 → 400 CODE_EXPIRED
+        - 驗證碼已鎖定 → 403 CODE_LOCKED
+        - 找不到驗證碼 → 404 CODE_NOT_FOUND
+      operationId: verifyCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+            examples:
+              valid:
+                summary: 有效的驗證請求
+                value:
+                  email: user@example.com
+                  code: "123456"
+      responses:
+        '200':
+          description: 驗證成功，使用者已建立
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyCodeResponse'
+              example:
+                success: true
+                message: Email 驗證成功
+                data:
+                  user:
+                    id: 550e8400-e29b-41d4-a716-446655440000
+                    email: user@example.com
+                    name: 王小明
+                  session:
+                    access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refresh_token: v1.MRjSjcVzLGxO...
+                    expires_in: 3600
+                    expires_at: 1731582000
+        '400':
+          description: 驗證碼錯誤或格式不正確
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_code:
+                  summary: 驗證碼錯誤
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_CODE
+                      message: 驗證碼錯誤
+                      details:
+                        attempts_remaining: 3
+                code_expired:
+                  summary: 驗證碼已過期
+                  value:
+                    success: false
+                    error:
+                      code: CODE_EXPIRED
+                      message: 驗證碼已過期，請重新發送
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/resend-code:
+    post:
+      tags:
+        - Registration
+      summary: 重新發送驗證碼
+      description: |
+        重新產生並發送驗證碼到使用者 Email。
+        
+        **業務邏輯**:
+        1. 檢查 Email 是否存在 registration_request
+        2. 檢查上次發送時間（60 秒冷卻）
+        3. 將舊的 pending 驗證碼標記為 expired
+        4. 產生新的 6 位數驗證碼
+        5. 儲存新驗證碼（bcrypt hash）
+        6. 透過 Resend API 發送 Email
+        7. 回傳成功訊息
+        
+        **限制**:
+        - 冷卻時間: 60 秒
+        - 註冊請求過期時間會重設為當前時間 + 30 分鐘
+        
+        **錯誤處理**:
+        - Email 未註冊 → 404 EMAIL_NOT_FOUND
+        - 冷卻時間未到 → 429 RATE_LIMIT（包含剩餘秒數）
+        - Resend API 失敗 → 503 EMAIL_SEND_FAILED
+      operationId: resendVerificationCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendCodeRequest'
+            example:
+              email: user@example.com
+      responses:
+        '200':
+          description: 驗證碼已重新發送
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendCodeResponse'
+              example:
+                success: true
+                message: 驗證碼已重新發送
+                data:
+                  email: user@example.com
+                  expires_at: "2025-11-14T10:40:00Z"
+                  can_resend_after: "2025-11-14T10:36:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: 請求過於頻繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  code: RATE_LIMIT
+                  message: 請稍後再試
+                  details:
+                    retry_after_seconds: 45
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 使用者登入
+      description: |
+        使用 Email 與密碼登入，成功後回傳 JWT token。
+        
+        **業務邏輯**:
+        1. 驗證 Email 與密碼格式
+        2. 呼叫 Supabase Auth signInWithPassword
+        3. 驗證成功則回傳 session（access token + refresh token）
+        4. 更新 auth.users.last_sign_in_at（Supabase Auth 自動處理）
+        
+        **Session 管理**:
+        - Access token 有效期: 1 小時
+        - Refresh token 有效期: 30 天
+        - 前端需儲存 token 到 flutter_secure_storage
+        
+        **錯誤處理**:
+        - Email 或密碼錯誤 → 401 INVALID_CREDENTIALS
+        - Email 未驗證 → 403 EMAIL_NOT_VERIFIED
+        - 帳號被鎖定 → 403 ACCOUNT_LOCKED
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              valid:
+                summary: 有效的登入請求
+                value:
+                  email: user@example.com
+                  password: Password123
+      responses:
+        '200':
+          description: 登入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                success: true
+                message: 登入成功
+                data:
+                  user:
+                    id: 550e8400-e29b-41d4-a716-446655440000
+                    email: user@example.com
+                    name: 王小明
+                  session:
+                    access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refresh_token: v1.MRjSjcVzLGxO...
+                    expires_in: 3600
+                    expires_at: 1731582000
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: 使用者登出
+      description: |
+        登出當前使用者並撤銷 JWT token。
+        
+        **業務邏輯**:
+        1. 驗證 Authorization header 中的 access token
+        2. 呼叫 Supabase Auth signOut
+        3. 撤銷 refresh token（Supabase Auth 自動處理）
+        4. 前端需清除 flutter_secure_storage 中的 token
+        
+        **注意事項**:
+        - 此操作僅撤銷 server-side token
+        - 前端必須同步清除本地儲存的 token
+        - 登出後原有的 access token 將立即失效
+      operationId: logoutUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+              example:
+                success: true
+                message: 登出成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Session
+      summary: 刷新 Access Token
+      description: |
+        使用 refresh token 取得新的 access token。
+        
+        **業務邏輯**:
+        1. 驗證 refresh token 有效性
+        2. 檢查 refresh token 是否過期（30 天）
+        3. 產生新的 access token（有效期 1 小時）
+        4. 回傳新的 session 資訊
+        
+        **自動刷新策略**:
+        - 前端應在 access token 過期前 5 分鐘自動刷新
+        - 使用 flutter_riverpod 的 timer 機制實現
+        
+        **錯誤處理**:
+        - Refresh token 無效 → 401 INVALID_REFRESH_TOKEN
+        - Refresh token 過期 → 401 REFRESH_TOKEN_EXPIRED
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+            example:
+              refresh_token: v1.MRjSjcVzLGxO...
+      responses:
+        '200':
+          description: Token 刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+              example:
+                success: true
+                message: Token 已刷新
+                data:
+                  session:
+                    access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refresh_token: v1.MRjSjcVzLGxO...
+                    expires_in: 3600
+                    expires_at: 1731585600
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags:
+        - Session
+      summary: 取得當前使用者資訊
+      description: |
+        使用 access token 取得當前登入使用者的個人資料。
+        
+        **業務邏輯**:
+        1. 驗證 Authorization header 中的 access token
+        2. 從 JWT payload 取得 user_id
+        3. 查詢 auth.users 與 user_profiles
+        4. 回傳使用者資訊（不包含密碼）
+        
+        **用途**:
+        - App 啟動時驗證 token 有效性
+        - 取得使用者資料更新 UI
+        - 實現 auto-login 功能
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功取得使用者資訊
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+              example:
+                success: true
+                data:
+                  user:
+                    id: 550e8400-e29b-41d4-a716-446655440000
+                    email: user@example.com
+                    name: 王小明
+                    created_at: "2025-11-14T10:00:00Z"
+                    last_sign_in_at: "2025-11-14T15:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 使用者 Email（會統一轉換為小寫）
+          example: user@example.com
+          maxLength: 255
+        name:
+          type: string
+          description: 使用者姓名（支援中英文）
+          example: 王小明
+          minLength: 1
+          maxLength: 50
+        password:
+          type: string
+          format: password
+          description: |
+            密碼規則:
+            - 長度: 8-20 碼
+            - 必須包含: 大寫字母、小寫字母、數字
+          example: Password123
+          minLength: 8
+          maxLength: 20
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 驗證碼已發送至您的 Email，請於 5 分鐘內完成驗證
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: user@example.com
+            expires_at:
+              type: string
+              format: date-time
+              description: 驗證碼過期時間（ISO 8601 格式）
+              example: "2025-11-14T10:35:00Z"
+
+    VerifyCodeRequest:
+      type: object
+      required:
+        - email
+        - code
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        code:
+          type: string
+          pattern: '^\d{6}$'
+          description: 6 位數驗證碼
+          example: "123456"
+
+    VerifyCodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Email 驗證成功
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            session:
+              $ref: '#/components/schemas/Session'
+
+    ResendCodeRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    ResendCodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 驗證碼已重新發送
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: user@example.com
+            expires_at:
+              type: string
+              format: date-time
+              description: 新驗證碼過期時間
+              example: "2025-11-14T10:40:00Z"
+            can_resend_after:
+              type: string
+              format: date-time
+              description: 下次可重新發送時間
+              example: "2025-11-14T10:36:00Z"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: Password123
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 登入成功
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            session:
+              $ref: '#/components/schemas/Session'
+
+    LogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 登出成功
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Refresh token（從登入或先前刷新取得）
+          example: v1.MRjSjcVzLGxO...
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Token 已刷新
+        data:
+          type: object
+          properties:
+            session:
+              $ref: '#/components/schemas/Session'
+
+    UserInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/UserDetail'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 使用者 UUID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: 王小明
+
+    UserDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: 王小明
+        created_at:
+          type: string
+          format: date-time
+          description: 帳號建立時間
+          example: "2025-11-14T10:00:00Z"
+        last_sign_in_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 最後登入時間
+          example: "2025-11-14T15:30:00Z"
+
+    Session:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token（有效期 1 小時）
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          description: Refresh token（有效期 30 天）
+          example: v1.MRjSjcVzLGxO...
+        expires_in:
+          type: integer
+          description: Access token 有效秒數
+          example: 3600
+        expires_at:
+          type: integer
+          description: Access token 過期時間戳記（Unix timestamp）
+          example: 1731582000
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: 錯誤代碼（大寫英文 + 底線）
+              example: INVALID_EMAIL
+            message:
+              type: string
+              description: 錯誤訊息（繁體中文）
+              example: Email 格式不正確
+            details:
+              type: object
+              description: 額外錯誤資訊（選用）
+              additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: 請求參數錯誤
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_email:
+              summary: Email 格式錯誤
+              value:
+                success: false
+                error:
+                  code: INVALID_EMAIL
+                  message: Email 格式不正確
+            invalid_password:
+              summary: 密碼不符規則
+              value:
+                success: false
+                error:
+                  code: INVALID_PASSWORD
+                  message: 密碼必須為 8-20 碼，包含大小寫字母與數字
+            email_exists:
+              summary: Email 已註冊
+              value:
+                success: false
+                error:
+                  code: EMAIL_EXISTS
+                  message: 此 Email 已被註冊
+
+    Unauthorized:
+      description: 未授權（Token 無效或過期）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_token:
+              summary: Token 無效
+              value:
+                success: false
+                error:
+                  code: INVALID_TOKEN
+                  message: 無效的 access token
+            token_expired:
+              summary: Token 過期
+              value:
+                success: false
+                error:
+                  code: TOKEN_EXPIRED
+                  message: Access token 已過期，請重新登入或刷新 token
+            invalid_credentials:
+              summary: Email 或密碼錯誤
+              value:
+                success: false
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: Email 或密碼錯誤
+
+    Forbidden:
+      description: 禁止存取
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            code_locked:
+              summary: 驗證碼已鎖定
+              value:
+                success: false
+                error:
+                  code: CODE_LOCKED
+                  message: 錯誤次數過多，請重新發送驗證碼
+            email_not_verified:
+              summary: Email 未驗證
+              value:
+                success: false
+                error:
+                  code: EMAIL_NOT_VERIFIED
+                  message: Email 尚未驗證，請先完成驗證
+
+    NotFound:
+      description: 資源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            code_not_found:
+              summary: 驗證碼不存在
+              value:
+                success: false
+                error:
+                  code: CODE_NOT_FOUND
+                  message: 找不到驗證碼，請重新發送
+            email_not_found:
+              summary: Email 未註冊
+              value:
+                success: false
+                error:
+                  code: EMAIL_NOT_FOUND
+                  message: 此 Email 尚未註冊
+
+    TooManyRequests:
+      description: 請求過於頻繁
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: RATE_LIMIT
+              message: 請求過於頻繁，請稍後再試
+              details:
+                retry_after_seconds: 60
+
+    ServiceUnavailable:
+      description: 服務暫時無法使用
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            email_send_failed:
+              summary: Email 發送失敗
+              value:
+                success: false
+                error:
+                  code: EMAIL_SEND_FAILED
+                  message: Email 發送失敗，請稍後再試
+            database_error:
+              summary: 資料庫錯誤
+              value:
+                success: false
+                error:
+                  code: DATABASE_ERROR
+                  message: 系統錯誤，請稍後再試
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        使用 Supabase Auth 產生的 JWT access token
+        
+        **Header 格式**:
+        ```
+        Authorization: Bearer <access_token>
+        ```
+        
+        **Token 有效期**: 1 小時  
+        **刷新機制**: 使用 /auth/refresh-token 端點
+
+security: []
