@@ -4,12 +4,86 @@
 .env.development.local
 .env.test.local
 .env.production.local
+lib/core/config/.env
+supabase/.env
+supabase/.env.local
 
 # macOS 系統檔案
 .DS_Store
 .DS_Store?
 .AppleDouble
 .LSOverride
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Android 平台特定 (local.properties 包含本地 SDK 路徑)
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/.gradle/
+**/android/captures/
+**/android/key.properties
+**/*.keystore
+**/*.jks
+
+# iOS/macOS 平台特定
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/**/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web 平台特定
+**/web/flutter_service_worker.js
+**/web/index.html.cache.dill
+**/web/manifest.json.cache.dill
+**/web/version.json
+
+# Linux 平台特定
+**/linux/flutter/ephemeral/
+
+# Windows 平台特定  
+**/windows/flutter/ephemeral/
+
+# IDE 設定
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+*.iml
 
 # Node.js
 node_modules/
@@ -20,15 +94,17 @@ package-lock.json
 
 # 建構產出
 dist/
-build/
 *.log
-
-# IDE 設定
-.idea/
-*.swp
-*.swo
-*~
 
 # 暫存檔案
 *.tmp
 .cache/
+
+# Supabase 本地開發
+supabase/.branches/
+supabase/.temp/
+
+# 測試覆蓋率
+coverage/
+test/.test_coverage.dart
+lcov.info
