@@ -45,7 +45,7 @@ Phase 8 (優化)
 ## Phase 1: 專案設定與基礎建設
 
 ### 環境設定與配置
-- [ ] [T001] [P] 設定 Supabase 專案與環境變數  
+- [X] [T001] [P] 設定 Supabase 專案與環境變數  
   - 檔案: `supabase/.env`, `lib/core/config/.env`  
   - 內容: 配置 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 
@@ -54,19 +54,19 @@ Phase 8 (優化)
   - 指令: `supabase db push`  
   - 驗證: 確認 `user_profiles`, `registration_requests`, `verification_codes` 資料表已建立
 
-- [ ] [T003] 初始化 Flutter Supabase 用戶端  
+- [X] [T003] 初始化 Flutter Supabase 用戶端  
   - 檔案: `lib/core/config/supabase_config.dart`  
   - 內容: 實作 `SupabaseConfig.initialize()`, 使用 `flutter_dotenv` 載入環境變數
 
-- [ ] [T004] [P] 設定 flutter_secure_storage  
+- [X] [T004] [P] 設定 flutter_secure_storage  
   - 檔案: `lib/data/datasources/session_local_datasource.dart`  
   - 內容: 封裝 token 儲存/讀取/刪除方法
 
-- [ ] [T005] [P] 設定 go_router 路由  
+- [X] [T005] [P] 設定 go_router 路由  
   - 檔案: `lib/core/router/app_router.dart`  
   - 內容: 定義路由: `/login`, `/register`, `/verify-email`, `/home`
 
-- [ ] [T006] 建立應用程式常數  
+- [X] [T006] 建立應用程式常數  
   - 檔案: `lib/core/constants/app_constants.dart`  
   - 內容: API 端點、驗證碼規則 (5 分鐘有效期、5 次嘗試上限、60 秒冷卻)
 
@@ -75,26 +75,26 @@ Phase 8 (優化)
 ## Phase 2: 共用模組與類型定義
 
 ### 後端共用模組
-- [ ] [T007] [P] 實作 TypeScript 類型定義  
+- [X] [T007] [P] 實作 TypeScript 類型定義  
   - 檔案: `supabase/functions/_shared/types.ts`  
   - 內容: 所有 API request/response 介面、資料庫實體型別、錯誤碼常數
   - 驗證標準: 涵蓋 contracts/auth-api.yaml 中定義的所有端點
 
-- [ ] [T008] [P] 實作輸入驗證器 (TypeScript)  
+- [X] [T008] [P] 實作輸入驗證器 (TypeScript)  
   - 檔案: `supabase/functions/_shared/validators.ts`  
   - 內容: Email、密碼 (8-20 碼、大小寫+數字)、姓名 (1-50 字元)、驗證碼 (6 位數字) 驗證
 
-- [ ] [T009] 實作 Email 服務模組  
+- [X] [T009] 實作 Email 服務模組  
   - 檔案: `supabase/functions/_shared/email-service.ts`  
   - 內容: 使用 Resend API 發送驗證碼 Email, 範本支援 HTML 格式
   - 依賴: [T001] (RESEND_API_KEY)
 
-- [ ] [T010] [P] 實作資料庫輔助函式  
+- [X] [T010] [P] 實作資料庫輔助函式  
   - 檔案: `supabase/functions/_shared/db-helpers.ts`  
   - 內容: 產生 6 位數驗證碼、bcrypt hash/compare、SELECT FOR UPDATE 查詢輔助
 
 ### 前端共用模組
-- [ ] [T011] [P] 實作輸入驗證器 (Dart)  
+- [X] [T011] [P] 實作輸入驗證器 (Dart)  
   - 檔案: `lib/core/utils/validators.dart`  
   - 內容: Email、密碼、姓名、驗證碼驗證, 回傳中文錯誤訊息
 
@@ -103,7 +103,7 @@ Phase 8 (優化)
 ## Phase 3: User Story 1 - 會員註冊與 Email 驗證 [P1]
 
 ### 後端 API (Edge Functions)
-- [ ] [T012] [US1] [P1] 實作 POST /auth/register 端點  
+- [X] [T012] [US1] [P1] 實作 POST /auth/register 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. 驗證 Email 格式與密碼強度
@@ -114,7 +114,7 @@ Phase 8 (優化)
   - 錯誤處理: EMAIL_EXISTS (400), INVALID_EMAIL (400), INVALID_PASSWORD (400), EMAIL_SEND_FAILED (503)
   - 依賴: [T008], [T009], [T010]
 
-- [ ] [T013] [US1] [P1] 實作 POST /auth/verify-code 端點  
+- [X] [T013] [US1] [P1] 實作 POST /auth/verify-code 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. SELECT FOR UPDATE 鎖定驗證碼記錄
@@ -129,37 +129,37 @@ Phase 8 (優化)
   - 依賴: [T010], [T012]
 
 ### 前端資料層 (Data Layer)
-- [ ] [T014] [US1] [P1] 建立 API 回應模型  
+- [X] [T014] [US1] [P1] 建立 API 回應模型  
   - 檔案: `lib/data/models/api_response_model.dart`  
   - 內容: `RegisterResponse`, `VerifyCodeResponse` 使用 `freezed` 與 `json_serializable`
 
-- [ ] [T015] [US1] [P1] 實作註冊 API 呼叫  
+- [X] [T015] [US1] [P1] 實作註冊 API 呼叫  
   - 檔案: `lib/data/datasources/auth_remote_datasource.dart`  
   - 方法: `registerUser(email, name, password)`, `verifyCode(email, code)`
   - 依賴: [T003]
 
-- [ ] [T016] [US1] [P1] 實作 AuthRepository 介面實作  
+- [X] [T016] [US1] [P1] 實作 AuthRepository 介面實作  
   - 檔案: `lib/data/repositories/auth_repository_impl.dart`  
   - 方法: `register()`, `verifyCode()`
   - 錯誤處理: 將 API 錯誤碼轉換為領域層例外
 
 ### 前端領域層 (Domain Layer)
-- [ ] [T017] [US1] [P1] 建立 Use Cases  
+- [X] [T017] [US1] [P1] 建立 Use Cases  
   - 檔案: `lib/domain/usecases/register_usecase.dart`, `lib/domain/usecases/verify_code_usecase.dart`  
   - 內容: 呼叫 repository 方法, 回傳 `Either<Failure, Success>`
 
 ### 前端展示層 (Presentation Layer)
-- [ ] [T018] [US1] [P1] 建立註冊狀態管理  
+- [X] [T018] [US1] [P1] 建立註冊狀態管理  
   - 檔案: `lib/presentation/providers/registration_provider.dart`  
   - 內容: 使用 `StateNotifier` 管理註冊流程狀態 (idle/loading/success/error)
   - 依賴: [T017]
 
-- [ ] [T019] [US1] [P1] 實作註冊頁面 UI  
+- [X] [T019] [US1] [P1] 實作註冊頁面 UI  
   - 檔案: `lib/presentation/pages/registration_page.dart`  
   - 欄位: Email, 姓名, 密碼 (即時驗證), 錯誤訊息顯示
   - 依賴: [T011], [T018]
 
-- [ ] [T020] [US1] [P1] 實作 Email 驗證頁面 UI  
+- [X] [T020] [US1] [P1] 實作 Email 驗證頁面 UI  
   - 檔案: `lib/presentation/pages/email_verification_page.dart`  
   - 功能: 6 位數驗證碼輸入, 倒數計時顯示 (5 分鐘), 剩餘嘗試次數, 重新發送連結 (60 秒冷卻)
   - 依賴: [T018]
@@ -169,7 +169,7 @@ Phase 8 (優化)
 ## Phase 4: User Story 3 - 使用者登入 [P1]
 
 ### 後端 API (Edge Functions)
-- [ ] [T021] [US3] [P1] 實作 POST /auth/login 端點  
+- [X] [T021] [US3] [P1] 實作 POST /auth/login 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. 驗證 Email 與密碼格式
@@ -178,7 +178,7 @@ Phase 8 (優化)
   - 錯誤處理: INVALID_CREDENTIALS (401), EMAIL_NOT_VERIFIED (403), ACCOUNT_LOCKED (403)
   - 依賴: [T008]
 
-- [ ] [T022] [US3] [P1] 實作 GET /auth/me 端點  
+- [X] [T022] [US3] [P1] 實作 GET /auth/me 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. 驗證 Authorization header 中的 access token
@@ -189,31 +189,31 @@ Phase 8 (優化)
   - 依賴: [FR-051], [FR-052]
 
 ### 前端資料層 (Data Layer)
-- [ ] [T023] [US3] [P1] 建立登入 API 回應模型  
+- [X] [T023] [US3] [P1] 建立登入 API 回應模型  
   - 檔案: `lib/data/models/api_response_model.dart`  
   - 內容: `LoginResponse`, `UserInfoResponse`
 
-- [ ] [T024] [US3] [P1] 實作登入 API 呼叫  
+- [X] [T024] [US3] [P1] 實作登入 API 呼叫  
   - 檔案: `lib/data/datasources/auth_remote_datasource.dart`  
   - 方法: `loginUser(email, password)`, `getCurrentUser(accessToken)`
 
-- [ ] [T025] [US3] [P1] 實作 Session 本地儲存  
+- [X] [T025] [US3] [P1] 實作 Session 本地儲存  
   - 檔案: `lib/data/datasources/session_local_datasource.dart`  
   - 方法: `saveSession(accessToken, refreshToken)`, `getSession()`, `clearSession()`
   - 依賴: [T004]
 
 ### 前端領域層 (Domain Layer)
-- [ ] [T026] [US3] [P1] 建立登入 Use Case  
+- [X] [T026] [US3] [P1] 建立登入 Use Case  
   - 檔案: `lib/domain/usecases/login_usecase.dart`  
   - 內容: 呼叫 login API, 儲存 session 到本地
 
 ### 前端展示層 (Presentation Layer)
-- [ ] [T027] [US3] [P1] 建立認證狀態管理  
+- [X] [T027] [US3] [P1] 建立認證狀態管理  
   - 檔案: `lib/presentation/providers/auth_provider.dart`  
   - 內容: 使用 `StateNotifier` 管理登入狀態 (authenticated/unauthenticated), 自動登入邏輯
   - 依賴: [T026], [T025]
 
-- [ ] [T028] [US3] [P1] 實作登入頁面 UI  
+- [X] [T028] [US3] [P1] 實作登入頁面 UI  
   - 檔案: `lib/presentation/pages/login_page.dart`  
   - 欄位: Email, 密碼, 錯誤訊息顯示, 導航到註冊頁面連結
   - 依賴: [T027]
@@ -223,7 +223,7 @@ Phase 8 (優化)
 ## Phase 5: User Story 2 - 重新發送驗證碼 [P2]
 
 ### 後端 API (Edge Functions)
-- [ ] [T029] [US2] [P2] 實作 POST /auth/resend-code 端點  
+- [X] [T029] [US2] [P2] 實作 POST /auth/resend-code 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. 檢查 Email 是否存在 registration_request
@@ -236,16 +236,16 @@ Phase 8 (優化)
   - 依賴: [T009], [T010], [T012]
 
 ### 前端資料層 (Data Layer)
-- [ ] [T030] [US2] [P2] 建立重發 API 回應模型  
+- [X] [T030] [US2] [P2] 建立重發 API 回應模型  
   - 檔案: `lib/data/models/api_response_model.dart`  
   - 內容: `ResendCodeResponse`
 
-- [ ] [T031] [US2] [P2] 實作重發 API 呼叫  
+- [X] [T031] [US2] [P2] 實作重發 API 呼叫  
   - 檔案: `lib/data/datasources/auth_remote_datasource.dart`  
   - 方法: `resendVerificationCode(email)`
 
 ### 前端展示層 (Presentation Layer)
-- [ ] [T032] [US2] [P2] 在 Email 驗證頁面新增重發功能  
+- [X] [T032] [US2] [P2] 在 Email 驗證頁面新增重發功能  
   - 檔案: `lib/presentation/pages/email_verification_page.dart`  
   - 功能: "重新發送" 按鈕, 60 秒冷卻倒數計時, 成功後顯示提示訊息
   - 依賴: [T020], [T031]
@@ -255,7 +255,7 @@ Phase 8 (優化)
 ## Phase 6: User Story 4 - 使用者登出 [P2]
 
 ### 後端 API (Edge Functions)
-- [ ] [T033] [US4] [P2] 實作 POST /auth/logout 端點  
+- [X] [T033] [US4] [P2] 實作 POST /auth/logout 端點  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 業務邏輯:
     1. 驗證 Authorization header 中的 access token
@@ -264,17 +264,17 @@ Phase 8 (優化)
   - 錯誤處理: UNAUTHORIZED (401)
 
 ### 前端資料層 (Data Layer)
-- [ ] [T034] [US4] [P2] 實作登出 API 呼叫  
+- [X] [T034] [US4] [P2] 實作登出 API 呼叫  
   - 檔案: `lib/data/datasources/auth_remote_datasource.dart`  
   - 方法: `logoutUser(accessToken)`
 
 ### 前端領域層 (Domain Layer)
-- [ ] [T035] [US4] [P2] 建立登出 Use Case  
+- [X] [T035] [US4] [P2] 建立登出 Use Case  
   - 檔案: `lib/domain/usecases/logout_usecase.dart`  
   - 內容: 呼叫 logout API, 清除本地 session
 
 ### 前端展示層 (Presentation Layer)
-- [ ] [T036] [US4] [P2] 在主頁新增登出功能  
+- [X] [T036] [US4] [P2] 在主頁新增登出功能  
   - 檔案: `lib/presentation/pages/home_page.dart`  
   - 功能: AppBar 選單 "登出", 確認對話框, 登出後導航到登入頁面
   - 依賴: [T027], [T035]
@@ -284,17 +284,17 @@ Phase 8 (優化)
 ## Phase 7: User Story 5 - 記帳主頁 [P3]
 
 ### 前端展示層 (Presentation Layer)
-- [ ] [T037] [US5] [P3] 實作記帳主頁 UI (佔位符)  
+- [X] [T037] [US5] [P3] 實作記帳主頁 UI (佔位符)  
   - 檔案: `lib/presentation/pages/home_page.dart`  
   - 內容: 簡單的歡迎訊息, 顯示使用者姓名, AppBar 包含登出按鈕
   - 依賴: [T027]
 
-- [ ] [T038] [US5] [P3] 設定路由守衛  
+- [X] [T038] [US5] [P3] 設定路由守衛  
   - 檔案: `lib/core/router/app_router.dart`  
   - 內容: 檢查 token 有效性, 未登入則導航到登入頁面
   - 依賴: [T005], [T025]
 
-- [ ] [T039] [US5] [P3] 實作自動登入流程  
+- [X] [T039] [US5] [P3] 實作自動登入流程  
   - 檔案: `lib/main.dart`, `lib/presentation/providers/auth_provider.dart`  
   - 內容: App 啟動時檢查本地 token, 有效則自動登入並導航到主頁
   - 依賴: [T025], [T027]
@@ -304,7 +304,7 @@ Phase 8 (優化)
 ## Phase 8: 跨切面功能與優化
 
 ### 安全性與錯誤處理
-- [ ] [T040] 實作 CORS 配置  
+- [X] [T040] 實作 CORS 配置  
   - 檔案: `supabase/functions/auth/index.ts`  
   - 內容: 設定允許的前端網域, 正式環境移除 `*` wildcard
 
