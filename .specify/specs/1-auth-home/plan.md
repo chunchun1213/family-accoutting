@@ -293,13 +293,13 @@ N/A - 無憲章違規項目
    - RegistrationRequest（註冊請求）實體與追蹤
 
 2. **contracts/auth-api.yaml**: API 合約（OpenAPI 3.0）
-   - `POST /auth/register` - 註冊使用者
-   - `POST /auth/send-verification-code` - 發送驗證碼
-   - `POST /auth/verify-code` - 驗證驗證碼
-   - `POST /auth/resend-verification-code` - 重新發送驗證碼
+   - `POST /auth/register` - 註冊使用者並發送驗證碼
+   - `POST /auth/verify-code` - 驗證驗證碼並建立帳號
+   - `POST /auth/resend-code` - 重新發送驗證碼
    - `POST /auth/login` - 登入
+   - `GET /auth/me` - 取得當前使用者資訊
    - `POST /auth/logout` - 登出
-   - `GET /auth/session` - 檢查會話狀態
+   - `POST /auth/refresh-token` - 刷新 access token
 
 3. **contracts/types.ts**: TypeScript 型別定義（前後端共用）
    - `RegisterRequest`, `RegisterResponse`

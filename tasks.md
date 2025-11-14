@@ -2,7 +2,7 @@
 
 **功能分支**: `1-auth-home`  
 **更新日期**: 2025-11-14  
-**總任務數**: 47 個任務
+**總任務數**: 48 個任務
 
 ---
 
@@ -16,7 +16,7 @@
 - [ ] **Phase 5: User Story 2 - 重新發送驗證碼 [P2]** (4 個任務)
 - [ ] **Phase 6: User Story 4 - 使用者登出 [P2]** (4 個任務)
 - [ ] **Phase 7: User Story 5 - 記帳主頁 [P3]** (3 個任務)
-- [ ] **Phase 8: 跨切面功能與優化** (9 個任務)
+- [ ] **Phase 8: 跨切面功能與優化** (10 個任務)
 
 ---
 
@@ -77,7 +77,8 @@ Phase 8 (優化)
 ### 後端共用模組
 - [ ] [T007] [P] 實作 TypeScript 類型定義  
   - 檔案: `supabase/functions/_shared/types.ts`  
-  - 內容: 所有 API request/response 介面、資料庫實體型別、錯誤碼常數 (已完成,需驗證)
+  - 內容: 所有 API request/response 介面、資料庫實體型別、錯誤碼常數
+  - 驗證標準: 涵蓋 contracts/auth-api.yaml 中定義的所有端點
 
 - [ ] [T008] [P] 實作輸入驗證器 (TypeScript)  
   - 檔案: `supabase/functions/_shared/validators.ts`  
@@ -185,6 +186,7 @@ Phase 8 (優化)
     3. 查詢 auth.users 與 user_profiles
     4. 回傳使用者資訊 (不含密碼)
   - 錯誤處理: UNAUTHORIZED (401)
+  - 依賴: [FR-051], [FR-052]
 
 ### 前端資料層 (Data Layer)
 - [ ] [T023] [US3] [P1] 建立登入 API 回應模型  
@@ -323,11 +325,12 @@ Phase 8 (優化)
     3. 產生新的 access token (1 小時)
     4. 回傳新的 session
   - 錯誤處理: INVALID_REFRESH_TOKEN (401), REFRESH_TOKEN_EXPIRED (401)
+  - 依賴: [FR-049]
 
 - [ ] [T044] 實作自動刷新 Token 邏輯  
   - 檔案: `lib/presentation/providers/auth_provider.dart`  
   - 內容: 使用 Riverpod timer 在 access token 過期前 5 分鐘自動刷新
-  - 依賴: [T043], [T027]
+  - 依賴: [T043], [T027], [FR-049], [FR-050]
 
 ### 測試與品質保證
 - [ ] [T045] [P] 撰寫後端單元測試  
@@ -342,6 +345,11 @@ Phase 8 (優化)
   - 檔案: `test/integration/auth_flow_test.dart`  
   - 內容: 測試完整的註冊→驗證→登入→登出流程
 
+- [ ] [T048] [P] 執行負載測試  
+  - 檔案: `test/load/auth_load_test.js`  
+  - 內容: 使用 k6 模擬 100 個並發註冊請求，驗證回應時間 < 3 秒 (P95)
+  - 依賴: [T012], [T013], [T021], [NFR-007]
+
 ---
 
 ## 執行建議
@@ -355,7 +363,7 @@ Phase 8 (優化)
 - **T001 + T002 + T004 + T005**: 環境設定可同時進行
 - **T007 + T008 + T010 + T011**: 共用模組可同時開發
 - **T012 + T021**: 後端 API 可同時實作
-- **T045 + T046 + T047**: 測試可平行撰寫
+- **T045 + T046 + T047 + T048**: 測試可平行撰寫
 
 ### 里程碑檢查點
 - **Milestone 1**: Phase 1-2 完成 → 驗證環境設定與共用模組
