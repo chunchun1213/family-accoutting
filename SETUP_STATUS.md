@@ -1,6 +1,8 @@
 # 開發環境設定狀態
 
-**更新時間**: 2025-11-14
+**更新時間**: 2025-11-14  
+**狀態**: 🟢 本地開發環境完全就緒  
+**進度**: 9/9 項目完成 (100%)
 
 ## ✅ 已完成設定
 
@@ -45,64 +47,145 @@
 ### 6. Edge Function 基礎結構
 - [x] `auth/index.ts` 建立（Hono 框架）
 - [x] `_shared/types.ts` 建立（型別定義）
+- [x] **Hono basePath 設定** (關鍵修正)
+  - 必須設定 `.basePath("/auth")` 才能正確匹配路由
+  - 已解決 404 問題
 
 ---
 
-## ⚠️ 待完成步驟
+## ✅ 本地開發環境已完成
 
-### 步驟 1: 建立 Supabase 雲端專案
+### 7. 本地 Supabase 服務
+- [x] Supabase 本地環境已啟動
+  - API URL: http://127.0.0.1:54321
+  - Database URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+  - Studio URL: http://127.0.0.1:54323
+  - Mailpit URL: http://127.0.0.1:54324
+- [x] 資料庫遷移已套用
+  - user_profiles 表格
+  - registration_requests 表格  
+  - verification_codes 表格
+- [x] Edge Function 基礎結構完成
+  - auth/index.ts 已實作
+  - 包含所有 API 端點 (register, verify-code, login, logout, me, resend-code, refresh-token)
+
+### 8. 規格文件完成
+- [x] tasks.md 已生成 (48 個任務)
+- [x] analyze-01.md 已生成並修復所有問題
+  - 需求覆蓋率: 100% (54/54)
+  - 所有 CRITICAL/HIGH 問題已解決
+- [x] spec.md 已更新
+  - 新增 FR-049~054 (Token refresh, 驗證碼儲存等)
+  - 新增 NFR-001~009 (非功能需求)
+- [x] plan.md 已更新
+  - API 端點清單已同步
+
+### 9. Edge Function 部署與測試 ✅
+- [x] 解決 Hono 404 問題
+  - **根本原因**: Hono 在 Supabase Edge Functions 中必須設定 basePath
+  - **解決方案**: `const app = new Hono().basePath("/auth")`
+- [x] config.toml 設定
+  - 本地開發設定 `verify_jwt = false`
+- [x] 所有 API 端點測試通過
+  - GET /auth - API 資訊
+  - GET /auth/health - 健康檢查
+  - POST /auth/register - 註冊 (含驗證)
+  - POST /auth/verify-code - 驗證碼
+  - POST /auth/login - 登入
+  - POST /auth/resend-code - 重送驗證碼
+  - POST /auth/refresh-token - 刷新 Token
+  - GET /auth/me - 取得使用者資訊
+  - POST /auth/logout - 登出
+
+---
+
+## 📝 待辦事項 (依優先順序)
+
+### 高優先級 - 開始實作
+
+#### 1. 提交當前變更到 Git
+**狀態**: 準備就緒  
+**包含檔案**:
+- spec.md (新增需求)
+- plan.md (更新 API 清單)
+- tasks.md (48 個任務)
+- analyze-01.md (分析報告)
+- auth/index.ts (Edge Function 更新)
+
+**建議提交訊息**:
+```
+feat: 完成本地開發環境設定與 Edge Function 實作
+
+## 規格與分析
+- 新增 FR-049~054 (Token refresh, 驗證碼儲存等)
+- 新增 NFR-001~009 (安全性、錯誤處理、效能需求)
+- 更新 API 端點清單 (plan.md)
+- 修正 tasks.md 依賴關係
+- 生成完整分析報告 analyze-01.md
+- 需求覆蓋率: 91.7% → 100%
+
+## Edge Function 實作
+- 實作所有 7 個 API 端點骨架
+- 修正 Hono basePath 設定 (關鍵修正)
+- 設定 config.toml verify_jwt = false (本地開發)
+- 整合 _shared 模組 (validators, db-helpers, email-service)
+- 所有端點測試通過 ✅
+
+## 測試結果
+- GET /auth - API 資訊 ✅
+- GET /auth/health - 健康檢查 ✅  
+- POST /auth/register - 註冊 ✅
+- POST /auth/verify-code - 驗證 ✅
+- POST /auth/login - 登入 ✅
+- POST /auth/resend-code - 重送驗證碼 ✅
+- POST /auth/refresh-token - 刷新 Token ✅
+- GET /auth/me - 取得使用者 ✅
+- POST /auth/logout - 登出 ✅
+
+狀態: 本地環境完全就緒,可開始實作業務邏輯
+```
+
+---
+
+### 中優先級 - 生產環境部署 (可選)
+
+#### 3. 建立 Supabase 雲端專案
+**狀態**: 未開始  
+**用途**: 生產環境部署、團隊協作
+
+**步驟**:
 1. 前往 https://supabase.com/
-2. 建立新專案（選擇 Singapore region）
-3. 取得以下金鑰：
-   ```
-   Settings → API
-   - Project URL (SUPABASE_URL)
-   - anon/public (SUPABASE_ANON_KEY)
-   - service_role (SUPABASE_SERVICE_ROLE_KEY)
-   ```
+2. 建立新專案 (建議 Singapore region)
+3. 取得金鑰: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+4. 連結本地專案: `supabase link --project-ref <your-project-id>`
+5. 推送遷移: `supabase db push`
+6. 部署 Edge Functions: `supabase functions deploy auth`
 
-### 步驟 2: 更新環境變數
-編輯 `lib/core/config/.env`:
-```env
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_ANON_KEY=eyJhbGc...
-API_BASE_URL=https://your-project-id.supabase.co/functions/v1
-ENVIRONMENT=development
-```
+#### 4. 註冊 Resend Email 服務
+**狀態**: 未開始  
+**用途**: 發送驗證碼 Email
 
-### 步驟 3: 連結本地專案到雲端
-```bash
-supabase login
-supabase link --project-ref <your-project-id>
-```
-
-### 步驟 4: 推送資料庫遷移
-```bash
-supabase db push
-```
-
-### 步驟 5: 部署 Edge Functions
-```bash
-supabase functions deploy auth
-```
-
-### 步驟 6: 註冊 Resend Email 服務
+**步驟**:
 1. 前往 https://resend.com/
-2. 註冊帳號並取得 API Key
-3. 設定環境變數：
-```bash
-supabase secrets set RESEND_API_KEY=re_your_api_key
-supabase secrets set VERIFICATION_EMAIL_FROM="Family Accounting <noreply@yourdomain.com>"
-```
+2. 註冊並取得 API Key
+3. 設定環境變數:
+   ```bash
+   supabase secrets set RESEND_API_KEY=re_your_api_key
+   supabase secrets set VERIFICATION_EMAIL_FROM="Family Accounting <noreply@yourdomain.com>"
+   ```
 
-### 步驟 7: 啟動本地開發環境
-```bash
-# 啟動 Supabase 本地服務
-supabase start
+---
 
-# 啟動 Flutter 應用程式
-flutter run
-```
+### 低優先級 - 優化項目
+
+#### 5. 升級 Supabase CLI
+**當前版本**: v2.54.11  
+**最新版本**: v2.58.5  
+**指令**: `brew upgrade supabase`
+
+#### 6. 設定 Resend Email 模板
+**用途**: 美化驗證碼 Email
+**參考**: `.specify/specs/1-auth-home/contracts/auth-api.yaml`
 
 ---
 

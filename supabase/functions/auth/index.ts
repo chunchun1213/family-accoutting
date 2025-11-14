@@ -1,12 +1,14 @@
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { Hono } from "https://deno.land/x/hono@v3.11.0/mod.ts";
-import { cors } from "https://deno.land/x/hono@v3.11.0/middleware.ts";
+// Setup type definitions for built-in Supabase Runtime APIs
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { Hono } from "https://deno.land/x/hono@v3.11.7/mod.ts";
+import { cors } from "https://deno.land/x/hono@v3.11.7/middleware.ts";
 import { InputValidator } from "../_shared/validators.ts";
 import { EmailService } from "../_shared/email-service.ts";
 import { DbHelpers } from "../_shared/db-helpers.ts";
 import { ERROR_CODES } from "../_shared/types.ts";
 
-const app = new Hono();
+// 🔧 關鍵修正: 設定 basePath 為 Edge Function 名稱
+const app = new Hono().basePath("/auth");
 
 // Enable CORS
 app.use("*", cors({
@@ -14,6 +16,32 @@ app.use("*", cors({
   allowMethods: ["GET", "POST"],
   allowHeaders: ["Content-Type", "Authorization"],
 }));
+
+// Root endpoint - API info
+app.get("/", (c) => {
+  return c.json({
+    service: "Family Accounting Auth API",
+    version: "1.0.0",
+    endpoints: {
+      register: "POST /auth/register",
+      verifyCode: "POST /auth/verify-code",
+      login: "POST /auth/login",
+      me: "GET /auth/me",
+      logout: "POST /auth/logout",
+      resendCode: "POST /auth/resend-code",
+      refreshToken: "POST /auth/refresh-token",
+    },
+    status: "running",
+  });
+});
+
+// Health check endpoint
+app.get("/health", (c) => {
+  return c.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Register endpoint
 app.post("/register", async (c) => {
@@ -309,4 +337,4 @@ app.post("/refresh-token", async (c) => {
   }
 });
 
-serve(app.fetch);
+Deno.serve(app.fetch);
